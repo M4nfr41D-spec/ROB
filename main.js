@@ -370,7 +370,6 @@ const Game = {
   
   showHub() {
     SceneManager.goToHub();
-    this.hideModal('startModal');
     this.showModal('hubModal');
     this.renderHubUI();
   },

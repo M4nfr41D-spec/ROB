@@ -9,6 +9,15 @@ import { State } from './State.js';
 import { Enemies } from './Enemies.js';
 import { Player } from './Player.js';
 
+// Determine active simulation bounds (wave mode uses canvas; exploration uses zone/world)
+function getActiveBounds(canvas, pad = 20) {
+  const zone = State.world?.currentZone;
+  if (zone && Number.isFinite(zone.width) && Number.isFinite(zone.height)) {
+    return { minX: -pad, minY: -pad, maxX: zone.width + pad, maxY: zone.height + pad };
+  }
+  return { minX: -pad, minY: -pad, maxX: canvas.width + pad, maxY: canvas.height + pad };
+}
+
 export const Bullets = {
   // Spawn a new bullet
   spawn(config) {
@@ -41,14 +50,16 @@ export const Bullets = {
   // Update all bullets
   update(dt, canvas) {
     // Player bullets
+    const bounds = getActiveBounds(canvas, 20);
+
     for (let i = State.bullets.length - 1; i >= 0; i--) {
       const b = State.bullets[i];
       
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       
-      // Off screen
-      if (b.y < -20 || b.y > canvas.height + 20 || b.x < -20 || b.x > canvas.width + 20) {
+      // Off screen (bounds aware)
+      if (b.y < bounds.minY || b.y > bounds.maxY || b.x < bounds.minX || b.x > bounds.maxX) {
         State.bullets.splice(i, 1);
         continue;
       }
@@ -86,8 +97,8 @@ export const Bullets = {
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       
-      // Off screen
-      if (b.y < -20 || b.y > canvas.height + 20 || b.x < -20 || b.x > canvas.width + 20) {
+      // Off screen (bounds aware)
+      if (b.y < bounds.minY || b.y > bounds.maxY || b.x < bounds.minX || b.x > bounds.maxX) {
         State.enemyBullets.splice(i, 1);
         continue;
       }

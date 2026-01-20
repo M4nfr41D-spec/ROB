@@ -12,6 +12,8 @@ export const Pickups = {
   // Update all pickups
   update(dt, canvas) {
     const p = State.player;
+    const zone = State.world?.currentZone;
+    const floorY = (zone && Number.isFinite(zone.height)) ? (zone.height - 20) : (canvas.height - 20);
     
     for (let i = State.pickups.length - 1; i >= 0; i--) {
       const pk = State.pickups[i];
@@ -50,9 +52,9 @@ export const Pickups = {
         continue;
       }
       
-      // Keep on screen
-      if (pk.y > canvas.height - 20) {
-        pk.y = canvas.height - 20;
+      // Keep within vertical bounds
+      if (pk.y > floorY) {
+        pk.y = floorY;
         pk.vy = -Math.abs(pk.vy) * 0.5;
       }
     }

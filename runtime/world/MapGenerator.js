@@ -37,7 +37,7 @@ export const MapGenerator = {
 
     let enemyDensity = (cfg.enemyDensity || 0.0005) * depthEnemyMult;
     let eliteDensity = (cfg.eliteDensity || 0.00008) * depthEliteMult;
-    let obstacleDensity = (obstacleDensity) * depthObsMult;
+    let obstacleDensity = (cfg.obstacleDensity || 0.0002) * depthObsMult;
 
     // Modifier effects (kept small but cumulative)
     if (modSet.has('BULLET_HELL')) enemyDensity = scale(enemyDensity, 1.35);
@@ -59,6 +59,7 @@ export const MapGenerator = {
       width: width,
       height: height,
       biome: actConfig.biome || 'space',
+      bounds: { minX: 0, minY: 0, maxX: width, maxY: height },
       
       // Spawn point (usually near edge)
       spawn: this.generateSpawnPoint(rng, width, height, cfg),
@@ -109,7 +110,7 @@ export const MapGenerator = {
     zone.eliteSpawns = this.generateEliteSpawns(
       rng,
       actConfig.enemies?.elitePool || ['commander'],
-      cfg.eliteDensity || 0.0001,
+      eliteDensity,
       width,
       height
     );
@@ -148,6 +149,7 @@ export const MapGenerator = {
       width: width,
       height: height,
       biome: actConfig.biome,
+      bounds: { minX: 0, minY: 0, maxX: width, maxY: height },
       isBossZone: true,
       
       spawn: { x: width / 2, y: height - 100 },

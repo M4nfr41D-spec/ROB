@@ -7,6 +7,15 @@
 
 import { State } from './State.js';
 
+// Determine active simulation bounds (wave mode uses canvas; exploration uses zone/world)
+function getActiveBounds(canvas, pad = 100) {
+  const zone = State.world?.currentZone;
+  if (zone && Number.isFinite(zone.width) && Number.isFinite(zone.height)) {
+    return { minX: -pad, minY: -pad, maxX: zone.width + pad, maxY: zone.height + pad, isExploration: true };
+  }
+  return { minX: -pad, minY: -pad, maxX: canvas.width + pad, maxY: canvas.height + pad, isExploration: false };
+}
+
 export const Enemies = {
   // Spawn an enemy
   spawn(type, x, y, isElite = false, isBoss = false) {
@@ -136,6 +145,8 @@ export const Enemies = {
   
   // Update all enemies
   update(dt, canvas) {
+    const bounds = getActiveBounds(canvas, 100);
+
     for (const e of State.enemies) {
       if (e.dead) continue;
       
@@ -146,16 +157,37 @@ export const Enemies = {
       e.y += e.vy * dt;
       
       // Off screen check
-      if (e.y > canvas.height + 100 || e.x < -100 || e.x > canvas.width + 100) {
-        e.dead = true;
-        continue;
+      if (!bounds.isExploration || !e.spawnRef) {
+        if (e.y > bounds.maxY || e.y < bounds.minY || e.x < bounds.minX || e.x > bounds.maxX) {
+          e.dead = true;
+          continue;
+        }
+      } else {
+        // In exploration mode, World system handles despawning by distance.
+        // Keep a hard safety kill only if the entity is wildly outside zone bounds.
+        const hardPad = 600;
+        const zone = State.world?.currentZone;
+        if (zone && (e.x < -hardPad || e.x > zone.width + hardPad || e.y < -hardPad || e.y > zone.height + hardPad)) {
+          e.dead = true;
+          continue;
+        }
       }
       
       // Shooting
       e.shootTimer -= dt;
-      if (e.shootTimer <= 0 && e.y > 30 && e.y < canvas.height * 0.6) {
-        e.shootTimer = e.shootInterval + Math.random();
-        this.shoot(e);
+      if (e.shootTimer <= 0) {
+        if (bounds.isExploration && e.spawnRef) {
+          const p = State.player;
+          const dist = Math.hypot(p.x - e.x, p.y - e.y);
+          const shootRange = 800;
+          if (dist < shootRange) {
+            e.shootTimer = e.shootInterval + Math.random();
+            this.shoot(e);
+          }
+        } else if (e.y > 30 && e.y < canvas.height * 0.6) {
+          e.shootTimer = e.shootInterval + Math.random();
+          this.shoot(e);
+        }
       }
     }
     
@@ -193,9 +225,10 @@ export const Enemies = {
         e.vy = e.speed;
     }
     
-    // Keep on screen
+    // Keep in horizontal bounds (wave: canvas, exploration: zone)
+    const bw = (State.world?.currentZone && Number.isFinite(State.world.currentZone.width)) ? State.world.currentZone.width : canvas.width;
     if (e.x < 30) e.vx = Math.abs(e.vx);
-    if (e.x > canvas.width - 30) e.vx = -Math.abs(e.vx);
+    if (e.x > bw - 30) e.vx = -Math.abs(e.vx);
   },
   
   // Enemy shoots
