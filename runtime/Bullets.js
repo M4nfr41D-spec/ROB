@@ -9,15 +9,6 @@ import { State } from './State.js';
 import { Enemies } from './Enemies.js';
 import { Player } from './Player.js';
 
-// Determine active simulation bounds (wave mode uses canvas; exploration uses zone/world)
-function getActiveBounds(canvas, pad = 20) {
-  const zone = State.world?.currentZone;
-  if (zone && Number.isFinite(zone.width) && Number.isFinite(zone.height)) {
-    return { minX: -pad, minY: -pad, maxX: zone.width + pad, maxY: zone.height + pad };
-  }
-  return { minX: -pad, minY: -pad, maxX: canvas.width + pad, maxY: canvas.height + pad };
-}
-
 export const Bullets = {
   // Spawn a new bullet
   spawn(config) {
@@ -50,20 +41,75 @@ export const Bullets = {
   // Update all bullets
   update(dt, canvas) {
     // Player bullets
-    const bounds = getActiveBounds(canvas, 20);
-
     for (let i = State.bullets.length - 1; i >= 0; i--) {
       const b = State.bullets[i];
       
       b.x += b.vx * dt;
-      b.y += b.vy * dt;
-      
-      // Off screen (bounds aware)
-      if (b.y < bounds.minY || b.y > bounds.maxY || b.x < bounds.minX || b.x > bounds.maxX) {
-        State.bullets.splice(i, 1);
-        continue;
+      b.y += b.vy * dt;      // Off screen (world mode uses zone bounds)
+      const zone = State.world?.currentZone;
+      if (zone) {
+        const margin = 200;
+        if (b.y < -margin || b.y > zone.height + margin || b.x < -margin || b.x > zone.width + margin) {
+          State.bullets.splice(i, 1);
+          continue;
+        }
+      } else {
+        if (b.y < -20 || b.y > canvas.height + 20 || b.x < -20 || b.x > canvas.width + 20) {
+          State.bullets.splice(i, 1);
+          continue;
+        }
       }
-      
+      // Check collision with asteroid props (player bullets only)
+      const zoneAsteroids = zone?.asteroids;
+      if (b.isPlayer && Array.isArray(zoneAsteroids) && zoneAsteroids.length) {
+        let hitAsteroid = false;
+        for (const a of zoneAsteroids) {
+          if (!a || a.destroyed) continue;
+          const distA = Math.hypot(b.x - a.x, b.y - a.y);
+          if (distA < (b.size + (a.radius || 50))) {
+            // Damage asteroid
+            a.hp = (typeof a.hp === 'number') ? a.hp - b.damage : 0;
+
+            // Small impact feedback (keep it cheap)
+            State.particles.push({
+              x: b.x,
+              y: b.y,
+              vx: (Math.random() - 0.5) * 80,
+              vy: (Math.random() - 0.5) * 80,
+              life: 0.18,
+              maxLife: 0.18,
+              color: '#cccccc',
+              size: 2
+            });
+
+            // Destroyed -> drop scrap pickup
+            if (a.hp <= 0) {
+              a.destroyed = true;
+              const acfg = State.data.config?.asteroids || {};
+              const sMin = (typeof acfg.scrapMin === 'number') ? acfg.scrapMin : 2;
+              const sMax = (typeof acfg.scrapMax === 'number') ? acfg.scrapMax : 6;
+              const sizeFactor = Math.max(0.7, Math.min(1.6, (a.radius || 50) / 50));
+              const value = Math.floor((sMin + Math.random() * (sMax - sMin + 1)) * sizeFactor);
+              State.pickups.push({
+                type: 'scrap',
+                x: a.x,
+                y: a.y,
+                vx: (Math.random() - 0.5) * 60,
+                vy: (Math.random() - 0.5) * 60,
+                life: 12,
+                value: Math.max(1, value)
+              });
+            }
+
+            // Player bullets stop on impact (per your default)
+            State.bullets.splice(i, 1);
+            hitAsteroid = true;
+            break;
+          }
+        }
+        if (hitAsteroid) continue;
+      }
+
       // Check collision with enemies
       for (const e of State.enemies) {
         if (e.dead) continue;
@@ -95,19 +141,26 @@ export const Bullets = {
       const b = State.enemyBullets[i];
       
       b.x += b.vx * dt;
-      b.y += b.vy * dt;
-      
-      // Off screen (bounds aware)
-      if (b.y < bounds.minY || b.y > bounds.maxY || b.x < bounds.minX || b.x > bounds.maxX) {
-        State.enemyBullets.splice(i, 1);
-        continue;
+      b.y += b.vy * dt;      // Off screen (world mode uses zone bounds)
+      const zone = State.world?.currentZone;
+      if (zone) {
+        const margin = 200;
+        if (b.y < -margin || b.y > zone.height + margin || b.x < -margin || b.x > zone.width + margin) {
+          State.enemyBullets.splice(i, 1);
+          continue;
+        }
+      } else {
+        if (b.y < -20 || b.y > canvas.height + 20 || b.x < -20 || b.x > canvas.width + 20) {
+          State.enemyBullets.splice(i, 1);
+          continue;
+        }
       }
-      
       // Check collision with player
       const p = State.player;
       const dist = Math.hypot(b.x - p.x, b.y - p.y);
       if (dist < b.size + 15) {
         Player.takeDamage(b.damage);
+        if (b.dot) Player.applyDot(b.dot);
         State.enemyBullets.splice(i, 1);
       }
     }
@@ -207,7 +260,8 @@ export const Bullets = {
         vx: (Math.random() - 0.5) * 50,
         vy: -50 + Math.random() * 30,
         life: 10,
-        rarity: killData.isBoss ? 'legendary' : (killData.isElite ? 'rare' : null)
+        rarity: killData.isBoss ? 'legendary' : null,
+        rarityFloor: killData.isElite ? 'rare' : null
       });
     }
     

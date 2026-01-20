@@ -77,6 +77,7 @@ export const State = {
     active: false,
     inCombat: false,
     currentAct: null,
+    mode: 'exploration',
     wave: 0,
     cells: 0,
     scrapEarned: 0,
@@ -130,6 +131,10 @@ export const State = {
     left: false,
     right: false,
     fire: false,
+    // Interaction (portals, terminals, etc.)
+    interact: false,
+    interactPressed: false,
+    shift: false,
     mouseX: 0,
     mouseY: 0
   },
@@ -155,6 +160,7 @@ export function resetRun() {
     active: false,
     inCombat: false,
     currentAct: null,
+    mode: 'exploration',
     wave: 0,
     cells: 0,
     scrapEarned: 0,

@@ -1,7 +1,6 @@
 {
   "version": "2.2.0",
   "name": "BONZOOKAA!",
-  
   "player": {
     "baseHP": 100,
     "baseDamage": 6,
@@ -11,23 +10,19 @@
     "baseCritDamage": 150,
     "basePickupRadius": 60,
     "bulletSpeed": 800,
-    
     "acceleration": 3000,
     "friction": 0.65,
     "deadzone": 0.1,
-    
     "shieldRegenRate": 5,
     "shieldRegenDelay": 3
   },
-  
   "progression": {
     "baseXP": 100,
     "xpScale": 1.15,
-    "maxLevel": 100,
+    "maxLevel": 0,
     "skillPerLevel": 1,
     "statPerLevel": 3
   },
-  
   "waves": {
     "vendorInterval": 5,
     "vendorStart": 3,
@@ -35,32 +30,27 @@
     "eliteChance": 0.12,
     "baseEnemyCount": 4,
     "enemyCountScale": 0.6,
-    
     "scaleMode": "exponential",
     "scaleBase": 1.12,
     "scaleLinear": 0.08,
     "eliteHPMult": 2.5,
     "bossHPMult": 8
   },
-  
   "economy": {
     "scrapPerKill": 5,
     "cellsPerKill": 3,
     "bossScrapMult": 10,
     "eliteScrapMult": 3
   },
-  
   "loot": {
     "baseDropChance": 0.05,
     "bossDropChance": 1.0,
-    "eliteDropChance": 0.30
+    "eliteDropChance": 0.3
   },
-  
   "stash": {
     "baseSlots": 56,
     "maxSlots": 200
   },
-  
   "effects": {
     "damageNumbers": {
       "baseSize": 16,
@@ -77,6 +67,104 @@
       "killIntensity": 2,
       "critIntensity": 4,
       "bossIntensity": 10
+    }
+  },
+  "exploration": {
+    "bossEveryNZones": 10,
+    "mapScale": 5.0,
+    "enemyDensityMult": 0.35,
+    "eliteDensityMult": 0.5,
+    "maxEnemySpawnsPerZone": 90,
+    "maxEliteSpawnsPerZone": 6,
+    "enemySpawnMinDistBetween": 190,
+    "enemySpawnMinDistFromSpawn": 360,
+    "enemySpawnMinDistFromExit": 240,
+    "spawnViewMargin": 520,
+    "despawnViewMargin": 1800,
+    "portalInteractRadius": 75,
+    "enemyAggroRangeMult": 0.7,
+    "enemyFireIntervalMult": 1.75,
+    "maxStarsBackground": 1200,
+    "maxStarsMidground": 800,
+    "maxDecorationsPerZone": 4000,
+    "maxObstaclesPerZone": 1500,
+    "themeBlockSizeDepths": 2,
+    "themesPool": [
+      "act1",
+      "act2",
+      "act3",
+      "act4"
+    ],
+    "themeNoImmediateRepeat": true,
+    "bossDirector": {
+      "bossIds": [
+        "sentinel",
+        "collector",
+        "harbinger",
+        "warden",
+        "forgemind"
+      ],
+      "noImmediateRepeat": true
+    },
+    "bossPool": [
+      "sentinel",
+      "collector",
+      "harbinger",
+      "warden",
+      "forgemind"
+    ],
+    "bossNoImmediateRepeat": true
+  },
+  "asteroids": {
+    "enabled": true,
+    "maxPerZone": 30,
+    "playerCollisionDamagePct": 0.05,
+    "playerCollisionCooldown": 0.75,
+    "knockbackStrength": 280,
+    "scrapMin": 2,
+    "scrapMax": 6,
+    "spritePaths": [
+      "./assets/asteroids/asteroid_1.png",
+      "./assets/asteroids/asteroid_2.png"
+    ],
+    "minNearSpawn": 6,
+    "nearSpawnRadius": 1400
+  },
+  "background": {
+    "enabled": true,
+    "tileScale": 1.0,
+    "tileByAct": {
+      "act1": "./assets/backgrounds/tile_city_ruins.webp",
+      "act2": "./assets/backgrounds/tile_toxicity.webp",
+      "act3": "./assets/backgrounds/tile_void.webp",
+      "act4": "./assets/backgrounds/tile_city_ruins.webp"
+    },
+    "deco": {
+      "enabled": true,
+      "count": 6,
+      "scrollSpeed": 0.55,
+      "spritePaths": [
+        "./assets/asteroids_deco/asteroid_deco_1.png",
+        "./assets/asteroids_deco/asteroid_deco_2.png",
+        "./assets/asteroids_deco/asteroid_deco_3.png",
+        "./assets/asteroids_deco/asteroid_deco_4.png",
+        "./assets/asteroids_deco/asteroid_deco_big.png"
+      ],
+      "alphaMin": 0.25,
+      "alphaMax": 0.65,
+      "scaleMin": 0.35,
+      "scaleMax": 1.1
+    },
+    "fog": {
+      "enabled": true,
+      "count": 1,
+      "scrollSpeed": 0.12,
+      "driftSpeed": 32,
+      "paths": [
+        "./assets/fog/fog_1.png",
+        "./assets/fog/fog_5.png",
+        "./assets/fog/fog_14.png"
+      ]
     }
   }
 }

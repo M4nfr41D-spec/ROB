@@ -9,24 +9,25 @@
 
 export class SeededRandom {
   constructor(seed) {
-    this.seed = seed;
-    this.state = seed;
+    this.seed = (seed >>> 0);
+    this.state = (seed >>> 0);
   }
   
   // Reset to original seed
   reset() {
-    this.state = this.seed;
+    this.state = (this.seed >>> 0);
   }
   
   // Set new seed
   setSeed(seed) {
-    this.seed = seed;
-    this.state = seed;
+    this.seed = (seed >>> 0);
+    this.state = (seed >>> 0);
   }
   
   // Get next random float [0, 1)
   next() {
-    let t = this.state += 0x6D2B79F5;
+    this.state = (this.state + 0x6D2B79F5) >>> 0;
+    let t = this.state;
     t = Math.imul(t ^ t >>> 15, t | 1);
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
@@ -71,7 +72,7 @@ export class SeededRandom {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    return Math.abs(hash);
+    return (hash >>> 0);
   }
 }
 

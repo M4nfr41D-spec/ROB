@@ -2,14 +2,6 @@
 
 # 🚀 BONZOOKAA v2 - Exploration Mode Roadmap
 
-## 🧩 PATCH LOG (Build Artifacts)
-
-| Patch | ZIP | Scope | Status |
-|------:|-----|-------|--------|
-| p001 | `BONZOOKAA_v2.0.0_p001_ExplorationStabilize.zip` | Exploration stability: world-bounds culling + MapGenerator density fix | ✅ Done |
-| p002 | `BONZOOKAA_v2.0.0_p002_RemoveLegacyStartModal.zip` | Remove legacy Start Run modal (undefined Game.start crash source); HUB is the single entry point | ✅ Done |
-
-
 ## ✅ PHASE 1: Core Architecture (DONE)
 
 ### Completed Systems

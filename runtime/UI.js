@@ -13,6 +13,8 @@ import { Save } from './Save.js';
 
 export const UI = {
   tooltipEl: null,
+  // Persist opened skill tree sections across rerenders (prevents accordion reset)
+  openTrees: new Set(),
   
   init() {
     this.tooltipEl = document.getElementById('tooltip');
@@ -189,7 +191,7 @@ export const UI = {
       const totalInTree = Object.values(learned[treeId] || {}).reduce((a, b) => a + b, 0);
       
       html += `
-        <div class="skill-tree-section" id="tree-${treeId}">
+        <div class="skill-tree-section ${this.openTrees.has(treeId) ? 'open' : ''}" id="tree-${treeId}">
           <div class="skill-tree-header" style="--tree-color: ${tree.color}" onclick="UI.toggleTree('${treeId}')">
             <span class="tree-icon">${tree.icon}</span>
             <span class="tree-name">${tree.name}</span>
@@ -224,7 +226,10 @@ export const UI = {
   
   toggleTree(treeId) {
     const section = document.getElementById(`tree-${treeId}`);
+    // Update DOM + persisted state so the tree stays open after rerenders.
     if (section) section.classList.toggle('open');
+    if (this.openTrees.has(treeId)) this.openTrees.delete(treeId);
+    else this.openTrees.add(treeId);
   },
   
   // ========== VENDOR ==========
@@ -446,10 +451,21 @@ export const UI = {
     setTimeout(() => el.remove(), 1000);
   },
   
-  // Update scrap display
+  // Update scrap display (hub/start/hud)
   renderScrap() {
-    const el = document.getElementById('scrapAmount');
-    if (el) el.textContent = State.meta.scrap || 0;
+    const metaScrap = State.meta.scrap || 0;
+    const runScrap = State.run?.scrapEarned || 0;
+
+    // Hub + Start screens show meta only
+    const hubEl = document.getElementById('hubScrap');
+    if (hubEl) hubEl.textContent = metaScrap;
+
+    const startEl = document.getElementById('startScrap');
+    if (startEl) startEl.textContent = metaScrap;
+
+    // HUD shows meta + run earnings
+    const hudEl = document.getElementById('hudScrap');
+    if (hudEl) hudEl.textContent = metaScrap + runScrap;
   },
   
   allocateStat(statId) {
